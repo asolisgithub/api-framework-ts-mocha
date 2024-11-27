@@ -1,0 +1,7 @@
+You are tasked with evaluating a document against a set of predefined criteria.
+Your goal is to determine whether the document contains all the necessary information to evaluate the criteria, or if additional information is required to fully assess it.
+If the document provides all the information necessary to evaluate the criteria, respond with the following JSON:
+{ "thoughts": string[], "db_query": null}
+Where thoughts would be your carefully thought out reasoning process before setting the db_query attribute
+If additional information is required to properly assess the criteria, respond with a query in the following format:
+{ "thoughts": string[], "db_query": "query string to search in the vector db"}

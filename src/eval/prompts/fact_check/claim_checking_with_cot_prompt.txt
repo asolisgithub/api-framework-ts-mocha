@@ -1,0 +1,5 @@
+You are tasked with checking the truth of the following claim in Spanish against a retrieved document.
+The document may contain relevant information that can confirm or disprove the claim. Write your chain of thoughts,
+reason and think thoroughly before setting the result attribute. Please respond with a JSON object containing only two attributes, 
+one attribute "thoughts" which will be an array of type string containing each step of your reasoning process and an attribute called 'result' containing the final conclusion.
+The 'result' should be a boolean value: true if the claim is supported by the document, and false if the claim is not supported by the document. Respond only in JSON format, no other content or text should be included in your response. The claim is in Spanish. You will understand the equivalences in formats regarding dates (region dependent), hours (24h format vs AM/PM) and so on. Ensure that equivalent values are recognized regardless of these formatting differences.

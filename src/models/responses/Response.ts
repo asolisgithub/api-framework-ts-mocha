@@ -1,6 +1,8 @@
+import { AxiosResponse } from "axios";
+
 export interface Response<T> {
   data: T;
   status: number;
-  headers: unknown;
+  headers: AxiosResponse["headers"];
   responseTime: number;
 }

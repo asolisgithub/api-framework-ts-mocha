@@ -4,7 +4,9 @@
   "description": "TypeScript API automation framework that does its job in a simple but effective way",
   "main": "index.js",
   "scripts": {
-    "test": "mocha src/**/*.spec.ts --timeout 10000",
+    "set-baseline": "cross-env RUN_MODE=baseline npx tsx ./scripts/baselineRunner.ts",
+    "set-reference": "cross-env RUN_MODE=first mocha src/**/*.spec.ts --timeout 0 --no-warnings",
+    "test": "cross-env RUN_MODE=test mocha src/**/*.spec.ts --timeout 0",
     "test-parallel": "mocha src/**/*.spec.ts --timeout 10000 --parallel",
     "smoke": "mocha src/**/*.spec.ts --grep @Smoke --timeout 10000",
     "regression": "mocha src/**/*.spec.ts --grep @Regression --timeout 10000",
@@ -18,6 +20,7 @@
     "@types/chai": "^4.3.1",
     "@types/expect": "^24.3.0",
     "@types/mocha": "^9.1.1",
+    "@types/papaparse": "^5.3.15",
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
     "axios-logger": "^2.6.0",
@@ -31,11 +34,17 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
     "@types/node": "^18.0.0",
     "ajv": "^8.11.0",
     "axios": "^1.6.1",
+    "cross-env": "^7.0.3",
+    "csv-stringify": "^6.5.2",
     "dotenv": "^16.0.0",
-    "mocha": "^10.0.0"
+    "fast-cosine-similarity": "^1.2.2",
+    "mocha": "^10.0.0",
+    "papaparse": "^5.4.1",
+    "voyageai": "^0.0.1-5"
   },
   "type": "module"
 }
