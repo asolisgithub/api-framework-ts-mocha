@@ -7,7 +7,7 @@ export class ChatbotService extends ServiceBase {
   sessionCookie: string | undefined;
 
   constructor() {
-    super(`:${process.env["CHATBOT_API_PORT"]}/query`);
+    super(`/query`);
     this.sessionCookie = undefined;
   }
 
