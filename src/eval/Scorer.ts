@@ -138,11 +138,7 @@ export class Scorer {
     if (process.env["RUN_MODE"] === "test") {
       const scoreThreshold = factCheckThreshold ?? this.factCheckThreshold;
 
-      const factCheckResult = await processClaimCheck(
-        userQueries.join(", "),
-        assistantResponse,
-        cot,
-      );
+      const factCheckResult = await processClaimCheck(userQueries, assistantResponse, cot);
 
       console.log("Fact Check score", factCheckResult.claimCheckPassPercentage / 100);
 

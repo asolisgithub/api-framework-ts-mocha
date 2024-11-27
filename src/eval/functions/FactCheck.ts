@@ -48,7 +48,7 @@ const claimCheckingWithCotPrompt = readPromptFromFile(
 );
 
 export async function processClaimCheck(
-  userQuery: string,
+  userQueries: string[],
   assistantResponse: string,
   useCot: boolean,
 ): Promise<FactCheckResult> {
@@ -70,44 +70,47 @@ export async function processClaimCheck(
   console.log("\nExtracted claims:\n");
   extractedClaimsList.forEach((claim: string) => console.log(`- ${claim}\n`));
 
-  const dbSemanticSearchResponse = await axios.post(process.env["CHATBOT_DB_API"] || "", {
-    query: userQuery,
-  });
-
-  const dbSemanticSearchDocuments = dbSemanticSearchResponse.data.documents;
-  console.log("\nRetrieved documents:\n");
-  dbSemanticSearchDocuments.forEach((doc: string) => console.log(`- ${doc.slice(0, 50)}...\n`));
-
   const trueLabeledClaims: string[] = [];
   const claimCheckResults: { claim: string; result: boolean }[] = [];
   const systemPrompt = useCot ? claimCheckingWithCotPrompt : claimCheckingPrompt;
 
-  for (const document of dbSemanticSearchDocuments) {
-    for (const claim of extractedClaimsList) {
-      if (!trueLabeledClaims.includes(claim)) {
-        const claimCheckContent = buildClaimCheckContent(claim, document);
+  for (const query of userQueries) {
+    const dbSemanticSearchResponse = await axios.post(process.env["CHATBOT_DB_API"] || "", {
+      query: query,
+    });
+    const dbSemanticSearchDocuments = dbSemanticSearchResponse.data.documents;
 
-        const checkClaimResultJson = await processResponseWithRetries<CheckClaimObject>(
-          anthropicClient,
-          systemPrompt,
-          claimCheckContent,
-          useCot ? validateThoughtsAndResultObject : validateResultObject,
-        );
+    console.log("\nRetrieved documents:\n");
 
-        if (checkClaimResultJson) {
-          if (useCot && "thoughts" in checkClaimResultJson) {
-            console.log(`Claim to verify: ${claim}\n`);
-            console.log(`Document: ${document.slice(0, 50)}...\n`);
-            console.log("Chain of thought:\n");
-            checkClaimResultJson.thoughts.forEach((thought: string) =>
-              console.log(`- ${thought}\n`),
-            );
-            console.log(`Conclusion: ${checkClaimResultJson.result}\n`);
-          }
+    dbSemanticSearchDocuments.forEach((doc: string) => console.log(`- ${doc.slice(0, 50)}...\n`));
 
-          if (checkClaimResultJson.result === true) {
-            trueLabeledClaims.push(claim);
-            claimCheckResults.push({ claim, result: true });
+    for (const document of dbSemanticSearchDocuments) {
+      for (const claim of extractedClaimsList) {
+        if (!trueLabeledClaims.includes(claim)) {
+          const claimCheckContent = buildClaimCheckContent(claim, document);
+
+          const checkClaimResultJson = await processResponseWithRetries<CheckClaimObject>(
+            anthropicClient,
+            systemPrompt,
+            claimCheckContent,
+            useCot ? validateThoughtsAndResultObject : validateResultObject,
+          );
+
+          if (checkClaimResultJson) {
+            if (useCot && "thoughts" in checkClaimResultJson) {
+              console.log(`Claim to verify: ${claim}\n`);
+              console.log(`Document: ${document.slice(0, 50)}...\n`);
+              console.log("Chain of thought:\n");
+              checkClaimResultJson.thoughts.forEach((thought: string) =>
+                console.log(`- ${thought}\n`),
+              );
+              console.log(`Conclusion: ${checkClaimResultJson.result}\n`);
+            }
+
+            if (checkClaimResultJson.result === true) {
+              trueLabeledClaims.push(claim);
+              claimCheckResults.push({ claim, result: true });
+            }
           }
         }
       }
@@ -119,40 +122,43 @@ export async function processClaimCheck(
   );
 
   for (const claim of unverifiedClaims) {
-    const extendedQuery = `${userQuery}, ${claim}`;
-    const additionalDbResponse = await axios.post(process.env["CHATBOT_DB_API"] || "", {
-      query: extendedQuery,
-    });
+    for (const query of userQueries) {
+      const extendedQuery = `${query}, ${claim}`;
 
-    const additionalDocuments = additionalDbResponse.data.documents;
-    console.log(`\nAdditional lookup for claim: ${claim}\n`);
-    additionalDocuments.forEach((doc: string) => console.log(`- ${doc.slice(0, 50)}...\n`));
+      const additionalDbResponse = await axios.post(process.env["CHATBOT_DB_API"] || "", {
+        query: extendedQuery,
+      });
 
-    for (const document of additionalDocuments) {
-      const claimCheckContent = buildClaimCheckContent(claim, document);
+      const additionalDocuments = additionalDbResponse.data.documents;
+      console.log(`\nAdditional lookup for claim: ${claim}\n`);
+      additionalDocuments.forEach((doc: string) => console.log(`- ${doc.slice(0, 50)}...\n`));
 
-      const additionalCheckResultJson = await processResponseWithRetries<CheckClaimObject>(
-        anthropicClient,
-        systemPrompt,
-        claimCheckContent,
-        useCot ? validateThoughtsAndResultObject : validateResultObject,
-      );
+      for (const document of additionalDocuments) {
+        const claimCheckContent = buildClaimCheckContent(claim, document);
 
-      if (additionalCheckResultJson) {
-        if (useCot && "thoughts" in additionalCheckResultJson) {
-          console.log(`Claim to verify (additional check): ${claim}\n`);
-          console.log(`Document: ${document.slice(0, 50)}...\n`);
-          console.log("Chain of thought:\n");
-          additionalCheckResultJson.thoughts.forEach((thought: string) =>
-            console.log(`- ${thought}\n`),
-          );
-          console.log(`Conclusion: ${additionalCheckResultJson.result}\n`);
-        }
+        const additionalCheckResultJson = await processResponseWithRetries<CheckClaimObject>(
+          anthropicClient,
+          systemPrompt,
+          claimCheckContent,
+          useCot ? validateThoughtsAndResultObject : validateResultObject,
+        );
 
-        if (additionalCheckResultJson.result === true) {
-          trueLabeledClaims.push(claim);
-          claimCheckResults.push({ claim, result: true });
-          break;
+        if (additionalCheckResultJson) {
+          if (useCot && "thoughts" in additionalCheckResultJson) {
+            console.log(`Claim to verify (additional check): ${claim}\n`);
+            console.log(`Document: ${document.slice(0, 50)}...\n`);
+            console.log("Chain of thought:\n");
+            additionalCheckResultJson.thoughts.forEach((thought: string) =>
+              console.log(`- ${thought}\n`),
+            );
+            console.log(`Conclusion: ${additionalCheckResultJson.result}\n`);
+          }
+
+          if (additionalCheckResultJson.result === true) {
+            trueLabeledClaims.push(claim);
+            claimCheckResults.push({ claim, result: true });
+            break;
+          }
         }
       }
     }

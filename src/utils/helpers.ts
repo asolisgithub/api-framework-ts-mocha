@@ -31,7 +31,7 @@ export function getReferenceAtIndex(referenceModel: ReferenceModel | undefined) 
   }
 }
 
-export function readPromptFromFile(fileName: string, subdirName: string): string {
+export function readPromptFromFile(fileName: string, subdirName = ""): string {
   const rootDir = process.cwd();
 
   const promptDir = path.join(rootDir, "src", "eval", "prompts", subdirName, fileName);

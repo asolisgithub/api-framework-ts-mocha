@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { MessageParam, TextBlock } from "@anthropic-ai/sdk/resources";
+import { readPromptFromFile } from "../../utils/helpers.js";
 
 export async function processResponseWithRetries<T>(
   client: Anthropic,
@@ -16,7 +17,7 @@ export async function processResponseWithRetries<T>(
         model: process.env["ANTHROPIC_MODEL"] || "claude-3-5-sonnet-latest",
         max_tokens: parseInt(process.env["MAX_TOKEN_OUTPUT"] || "8192", 10),
         temperature: 0,
-        system: systemPrompt,
+        system: readPromptFromFile("global.txt") + systemPrompt,
         messages: [content],
       });
 
