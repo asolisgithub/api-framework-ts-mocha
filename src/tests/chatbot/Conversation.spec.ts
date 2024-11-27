@@ -3,7 +3,7 @@ import { QueryModel } from "../../models/request/QueryModel.js";
 import { ChatbotService } from "../../models/services/ChatbotService.js";
 import { ChatbotResponse } from "../../models/responses/ChatbotResponse.js";
 
-describe.only("Conversation", () => {
+describe("Conversation", () => {
   const chatbotService = new ChatbotService();
   let scorer: Scorer;
 
