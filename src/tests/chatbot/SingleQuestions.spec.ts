@@ -52,7 +52,7 @@ describe("Single questions", () => {
 
     await scorer.compare(chatbotQueryResponse.data.response, chatbotUserQuery.query);
 
-    //await scorer.factCheck([chatbotUserQuery.query], chatbotQueryResponse.data.response);
+    await scorer.factCheck([chatbotUserQuery.query], chatbotQueryResponse.data.response);
   });
 
   it("Ask about refund policy", async () => {
