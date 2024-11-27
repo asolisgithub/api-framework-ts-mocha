@@ -3,5 +3,5 @@ Your goal is to determine whether the document contains all the necessary inform
 If the document provides all the information necessary to evaluate the criteria, respond with the following JSON:
 {"db_query": null}
 If additional information is required to properly assess the criteria, respond with a query in the following format:
-{"db_query": "query string to search in the vector db"}
+{"db_query": "query string to search in the vector db in, written in human readable language"}
 Respond only in JSON. Nothing but the JSON object specified
