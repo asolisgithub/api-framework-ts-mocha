@@ -91,6 +91,12 @@ export async function evalCriteria(
           useCot ? validateDbQueryObjectWithCot : validateDbQueryObject,
         );
 
+        if ("thoughts" in dbQueryCheck) {
+          for (const thought of dbQueryCheck.thoughts) {
+            console.log("- ", thought);
+          }
+        }
+
         if (dbQueryCheck?.db_query) {
           console.log("Additional info needed! - Query:", dbQueryCheck.db_query);
 
@@ -115,6 +121,12 @@ export async function evalCriteria(
               useCot ? validateThoughtsAndResultObject : validateResultObject,
             );
 
+            if ("thoughts" in result) {
+              for (const thought of result.thoughts) {
+                console.log("- ", thought);
+              }
+            }
+
             if (result?.result) {
               console.log(`✓ ${criteria}`);
               approvedCriteriaPhrases.push(criteria);
@@ -136,6 +148,12 @@ export async function evalCriteria(
             validateResultObject,
           );
 
+          if ("thoughts" in result) {
+            for (const thought of result.thoughts) {
+              console.log("- ", thought);
+            }
+          }
+
           if (result?.result) {
             console.log(`✓ ${criteria}`);
             approvedCriteriaPhrases.push(criteria);
@@ -154,6 +172,12 @@ export async function evalCriteria(
           },
           validateResultObject,
         );
+
+        if ("thoughts" in result) {
+          for (const thought of result.thoughts) {
+            console.log("- ", thought);
+          }
+        }
 
         if (result?.result) {
           console.log(`✓ ${criteria}`);
