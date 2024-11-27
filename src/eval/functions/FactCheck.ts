@@ -114,6 +114,50 @@ export async function processClaimCheck(
     }
   }
 
+  const unverifiedClaims = extractedClaimsList.filter(
+    (claim) => !trueLabeledClaims.includes(claim),
+  );
+
+  for (const claim of unverifiedClaims) {
+    const extendedQuery = `${userQuery}, ${claim}`;
+    const additionalDbResponse = await axios.post(process.env["CHATBOT_DB_API"] || "", {
+      query: extendedQuery,
+    });
+
+    const additionalDocuments = additionalDbResponse.data.documents;
+    console.log(`\nAdditional lookup for claim: ${claim}\n`);
+    additionalDocuments.forEach((doc: string) => console.log(`- ${doc.slice(0, 50)}...\n`));
+
+    for (const document of additionalDocuments) {
+      const claimCheckContent = buildClaimCheckContent(claim, document);
+
+      const additionalCheckResultJson = await processResponseWithRetries<CheckClaimObject>(
+        anthropicClient,
+        systemPrompt,
+        claimCheckContent,
+        useCot ? validateThoughtsAndResultObject : validateResultObject,
+      );
+
+      if (additionalCheckResultJson) {
+        if (useCot && "thoughts" in additionalCheckResultJson) {
+          console.log(`Claim to verify (additional check): ${claim}\n`);
+          console.log(`Document: ${document.slice(0, 50)}...\n`);
+          console.log("Chain of thought:\n");
+          additionalCheckResultJson.thoughts.forEach((thought: string) =>
+            console.log(`- ${thought}\n`),
+          );
+          console.log(`Conclusion: ${additionalCheckResultJson.result}\n`);
+        }
+
+        if (additionalCheckResultJson.result === true) {
+          trueLabeledClaims.push(claim);
+          claimCheckResults.push({ claim, result: true });
+          break;
+        }
+      }
+    }
+  }
+
   extractedClaimsList.forEach((claim: string) => {
     if (!trueLabeledClaims.includes(claim)) {
       console.log(`X ${claim}`);
