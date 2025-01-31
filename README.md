@@ -298,7 +298,7 @@ The idea is to compare how similar the output of an LLM is to a certain referenc
 The semantic comparison implementation involves a custom test runner and a method contained within the Scorer class. We embed text by calling an external API and we use cosine similarity to compare these embeddings.
 The custom runner allows us to run the same test any number of times, accounting for variation across LLM generation instances in order to set a more faithful baseline value.
 
-In order to start using this evaluation method, first write your test in the `.spec.ts` file and make use of the `.compare` method.
+In order to start using this evaluation method, first write your test in the `.spec.ts` file and make use of the `.compare()` method.
 Here, an instance of `ChatBotService` represents an example of a generic, ecommerce related Chat Bot. __It simply serves as an example API__. 
 
 ```typescript
@@ -387,9 +387,12 @@ We provide a `.factCheck()` function that checks wether the output of an LLM ali
     );
 ```
 
+This method queries a vector database using the query provided as the first argument and calculates a truthfulness percentage by checking the data retrieved against some content containing claims. It uses a basic RAG embedded query search behind the scenes and its expected for it to be modified depending on the use case.
+We can set a threshold that determines the truthfulness score needed so that the assertion returns true by modifying parameters inside the `Scorer.ts` class or adjust this number by passing the minimum score as an argument to `.factCheck()`.
+
 ### Customizable criteria eval
 
-Finally, we provide a general criteria evaluation function `.eval()`. This function leverages an LLM to evaluate wether certain content satisfies a certain criteria. Optionally, this function can make use of a vectorial db to search for additional relevant info.
+Finally, we provide a general criteria evaluation method `.eval()`. This function leverages an LLM to __evaluate wether certain content satisfies a certain criteria__. Optionally, this function can make use of a vectorial db to search for additional relevant info.
 
 ```typescript
     const smartphoneDetailsQuery: QueryModel = {
@@ -408,6 +411,8 @@ Finally, we provide a general criteria evaluation function `.eval()`. This funct
       smartphoneDetailsQueryResponse.data.response,
     );
 ```
+
+This method checks if certain content meets certain criteria by intelligently making use of LLM based judgement. It supports optional chain of though reasoning as an enhancement of traditional judgement capabilities.
 
 ## Bug Management
 
