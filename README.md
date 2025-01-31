@@ -298,7 +298,8 @@ The idea is to compare how similar the output of an LLM is to a certain referenc
 The semantic comparison implementation involves a custom test runner and a method contained within the Scorer class. We embed text by calling an external API and we use cosine similarity to compare these embeddings.
 The custom runner allows us to run the same test any number of times, accounting for variation across LLM generation instances in order to set a more faithful baseline value.
 
-In order to start using this evaluation method, first write your test in the `.spec.ts` file and make use of the compare method.
+In order to start using this evaluation method, first write your test in the `.spec.ts` file and make use of the `.compare` method.
+Here, an instance of `ChatBotService` represents an example of a generic, ecommerce related Chat Bot. __It simply serves as an example API__. 
 
 ```typescript
 
@@ -356,14 +357,14 @@ id,result
 1,0.9931317401108518
 ```
 
-We can now run the test file normally and use the threshold value as a minimum passing score. The reference file will be updated with relevant data obtained after running the baseline iterations.
+We can now run the test file normally and __use the threshold value as a minimum passing score for our tests__. The reference file will be updated with relevant data obtained after running the baseline iterations.
 
 ```csv
 user,assistant,mean,stdDev,threshold,iterations
 "Good morning, how are you?","Hello! Good morning. I’m the virtual assistant for the online store, here to help you with product availability, payment options, and in-store pickup locations. How can I assist you today?",0.9839170547781255,0.004138037038311033,0.976250791596312,2
 Do you have the Samsung S24?,"Yes! We have the Samsung Galaxy S24 available. Currently, we have 30 units in stock. The price is $899.99 and it features a 6.2-inch Dynamic AMOLED 2X display, 8GB of RAM, and 128GB of storage. Would you like to know more details about the device or information about payment options?",0.9857050704142143,0.009830292495169028,0.9619837513518913,2
 ```
-Overall, a feature like gives us a way of quickly checking how far off the output of our LLM based app is from a certain reference.
+Overall, a feature like gives us a numerical way of quickly checking how far off the output of our LLM based app is from a certain reference.
 
 ### Fact checking (Catching hallucinations)
 
